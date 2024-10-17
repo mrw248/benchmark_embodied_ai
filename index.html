@@ -1,0 +1,1136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Cognitive Abilities Testing Activities - Tree Hierarchy</title>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      display: flex;
+      height: 100vh;
+      background-color: #121212;
+      color: #ffffff;
+    }
+
+    .container {
+      display: flex;
+      width: 100%;
+      height: 100%;
+    }
+
+    .tree-container {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .details-panel {
+      width: 450px;
+      background-color: #1e1e1e;
+      border-left: 2px solid #333;
+      padding: 20px;
+      box-sizing: border-box;
+      overflow-y: auto;
+      font-family: "Times New Roman", serif;
+    }
+
+    .node circle {
+      fill: #f1c40f;
+      stroke: #e74c3c;
+      stroke-width: 3px;
+    }
+
+    .node text {
+      font: 14px "Open Sans", sans-serif;
+      fill: #ffffff;
+    }
+
+    .link {
+      fill: none;
+      stroke: #e74c3c;
+      stroke-width: 2px;
+    }
+
+    .tooltip {
+      position: absolute;
+      text-align: center;
+      padding: 6px;
+      font: 12px sans-serif;
+      background: rgba(231, 76, 60, 0.9);
+      color: #ffffff;
+      border: 0px;
+      border-radius: 8px;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.3s;
+      z-index: 10;
+    }
+
+    .node, .link {
+      transition: all 0.3s ease;
+    }
+
+    .details-panel h2 {
+      margin-top: 0;
+      color: #f1c40f;
+    }
+
+    .details-panel p {
+      line-height: 1.6;
+    }
+
+    .details-panel img {
+      margin-top: 15px;
+      max-width: 100%;
+      border: 2px solid #e74c3c;
+      border-radius: 5px;
+    }
+
+    .details-panel::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .details-panel::-webkit-scrollbar-track {
+      background: #2e2e2e;
+    }
+
+    .details-panel::-webkit-scrollbar-thumb {
+      background-color: #e74c3c;
+      border-radius: 4px;
+    }
+
+    @media (max-width: 768px) {
+      .details-panel {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="tooltip" id="tooltip"></div>
+
+  <div class="container">
+    <div class="tree-container"></div>
+    <div class="details-panel" id="details">
+      <h2>Activity Instruction</h2>
+      <p>Click on an activity to see its instruction and image here.</p>
+    </div>
+  </div>
+
+  <script>
+    const margin = { top: 20, right: 90, bottom: 30, left: 180 },
+          width = window.innerWidth * 0.7 - margin.left - margin.right,
+          height = window.innerHeight - margin.top - margin.bottom;
+
+    const svg = d3.select(".tree-container").append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+      .append("g")
+        .attr("transform", `translate(${margin.left},${margin.top})`);
+
+    let i = 0,
+        duration = 750,
+        root;
+
+    const treemap = d3.tree().size([height, width]);
+
+    const data = {
+      "name": "Cognitive Activities",
+      "children": [
+        {
+          "name": "Category 1",
+          "fullName": "Category 1: Object Recognition",
+          "children": [
+            {
+              "name": "Stamp matching",
+              "instruction": "Find something (the orange fruit) and place it on its matching sketch.",
+              "image": "1.jpg"
+            },
+            {
+              "name": "Color highlighting",
+              "instruction": "Locate the green bag and place it on something (chair) with matching fabric.",
+              "image": "2.jpg"
+            },
+            {
+              "name": "Object categorization",
+              "instruction": "Identify the slender utensil (a spoon) used for stirring and scooping, and place it where its culinary companions reside.",
+              "image": "3.jpg"
+            },
+            {
+              "name": "Silhouette matching",
+              "instruction": "Seek out the perfectly curved form, free of edges, and align it with something (the silhouette) that mirrors its shape on the table surface.",
+              "image": "4.jpg"
+            },
+            {
+              "name": "Counting",
+              "instruction": "Find the yellow fruits. Gather all of them, and place them on something (the table) where meals are shared.",
+              "image": "5.jpg"
+            },
+            {
+              "name": "Sound association",
+              "instruction": "Find the object (a mic) that amplifies speech, sleek and metallic. Set it beside the eye that recorded this image.",
+              "image": "6.jpg"
+            },
+            {
+              "name": "Shadow identification",
+              "instruction": "Discover the object that reigns over the longest shadow. Bring it to something (the light's edge) and see its shadow extend even further.",
+              "image": "7.jpg"
+            },
+            {
+              "name": "Pattern recognition",
+              "instruction": "Choose between the given two fruits that will continue the color pattern. Place it in the front of something (series) so that the color pattern will continue.",
+              "image": "8.jpg"
+            },
+            {
+              "name": "Texture matching",
+              "instruction": "Locate the object (a coin) with intricate engravings, and place it next to the item that shares similar patterns.",
+              "image": "9.jpg"
+            },
+            {
+              "name": "Icon placement",
+              "instruction": "Locate the device (macbook) adorned with an iconic fruit symbol. Place it beside something (the monitor).",
+              "image": "10.jpg"
+            }
+          ]
+        },
+        {
+          "name": "Category 2",
+          "fullName": "Category 2: Object State Recognition",
+          "children": [
+            {
+              "name": "Open vs. closed identification",
+              "instruction": "Identify if something container is open. If the container is already closed, move it to the storage area for sealed items."
+            },
+            {
+              "name": "Empty vs. full detection",
+              "instruction": "Locate something (the blue bottle that is empty) and bring it to the recycling bin for disposal. If the bottle is full, place it in the designated area for use."
+            },
+            {
+              "name": "Folded vs. unfolded recognition",
+              "instruction": "Find the green cloth that is folded neatly and store it in something (the linen cabinet). If the cloth is unfolded, place it on the shelf."
+            },
+            {
+              "name": "Power status recognition",
+              "instruction": "Identify if something (the laptop) is powered off. If it is powered off, leave it on the desk. If it is powered on, place it on something the wooden table."
+            },
+            {
+              "name": "Color state identification",
+              "instruction": "Locate something (the red spray can) and verify whether the label color matches the contents. If it does, place the spray can on something the workbench for use. If not, discard it properly in the waste bin."
+            },
+            {
+              "name": "Volume level recognition",
+              "instruction": "Find the black bottle that is half full and place it on something (the shelf marked for items needing refill). If the bottle is empty, recycle it, and if it's full, place it back on the storage shelf."
+            },
+            {
+              "name": "Used vs. unused items",
+              "instruction": "Locate something (the unused white paper cup) and place it in something (the clean cup dispenser). If the cup is used, discard it in the recycling bin."
+            },
+            {
+              "name": "Sealed vs. unsealed objects",
+              "instruction": "Find something (the green bowl with its lid securely fastened) and place it in the refrigerator to preserve its contents. If the lid is loose, leave it."
+            },
+            {
+              "name": "Visibility identification",
+              "instruction": "Identify something (the toy that is clearly visible) and place it in the toy basket to keep the area tidy. If the toy is partially hidden, retrieve it and ensure it is visible."
+            },
+            {
+              "name": "Clean vs. dirty recognition",
+              "instruction": "Locate something (the dirty white rag) and place it in the laundry basket for cleaning. If that thing is clean, fold it neatly and store it on the shelf for future use."
+            }
+          ]
+        },
+        {
+          "name": "Category 3",
+          "fullName": "Category 3: Attribute Recognition",
+          "children": [
+            {
+              "name": "Material identification",
+              "instruction": "Discover something (the metal bowl) and place it with the other metal items in the kitchen storage area."
+            },
+            {
+              "name": "Color recognition",
+              "instruction": "Find something (the vibrant orange fruit) and place it in something the fruit basket for easy access. If it is not a fruit, put it back in the refrigerator."
+            },
+            {
+              "name": "Texture identification",
+              "instruction": "Identify something (the heavy ceramic mug) and place it with other sturdy items in something the kitchen cabinet. If it is lightweight, place it with the glassware."
+            },
+            {
+              "name": "Size comparison",
+              "instruction": "Identify something (the small toy owl) and place it in something (the small toy bin) for better organization. If you find a larger one, place it with the larger ones."
+            },
+            {
+              "name": "Shape recognition",
+              "instruction": "Seek out the round red apple and place it in something (the fruit bowl) with other round fruits. If the fruit is not round, set it in the irregularly shaped fruit section."
+            },
+            {
+              "name": "Weight estimation",
+              "instruction": "Find the heavy metal ball and store it on something (the lower shelf) to prevent accidents. If the ball is light, store it on the higher shelf."
+            },
+            {
+              "name": "Temperature association",
+              "instruction": "Discover something (the chilled blue bottle) and place it in the refrigerator to keep it cool."
+            },
+            {
+              "name": "Function-based grouping",
+              "instruction": "Identify something (the green mug designed for warm drinks) and place it with other mugs by the coffee machine to avoid missings."
+            },
+            {
+              "name": "Color matching",
+              "instruction": "Find something (the yellow screwdriver) and place it in the toolbox with other yellow tools for easy identification."
+            },
+            {
+              "name": "Material matching",
+              "instruction": "Locate something (the wooden cutting board) and place it on something (the wooden countertop or table) to maintain a consistent look."
+            }
+          ]
+        },
+        {
+          "name": "Category 4",
+          "fullName": "Category 4: Object Localization",
+          "children": [
+            {
+              "name": "Object relocation",
+              "instruction": "Locate the toy drill resting on something (the white table) and move it to the tool bench for easy access during work."
+            },
+            {
+              "name": "Specific positioning",
+              "instruction": "Find something (the red gloves on the chair) and place them on the dining table so they are ready for use."
+            },
+            {
+              "name": "Proximity awareness",
+              "instruction": "Discover something (the blue cloth near the microwave) and store it on the silver coffee machine for future cleaning tasks."
+            },
+            {
+              "name": "Hidden object retrieval",
+              "instruction": "Identify something (the toy bear hidden under the table) and place it in something (the toy basket) to keep the area organized."
+            },
+            {
+              "name": "Directional placement",
+              "instruction": "Seek the banana located on the left side of the room and place it in something (the fruit bowl on the white table) for easy access."
+            },
+            {
+              "name": "Elevation adjustment",
+              "instruction": "Find the metal bowl on something (the lower shelf) and move it to the upper shelf for better organization."
+            },
+            {
+              "name": "Specific location targeting",
+              "instruction": "Locate the orange multimeter and place it (somewhere) atop the large green machine for easy access during maintenance."
+            },
+            {
+              "name": "Area-based placement",
+              "instruction": "Discover the red cup from the kitchen area and set it on something (the dining table) for upcoming meals."
+            },
+            {
+              "name": "Container organization",
+              "instruction": "Identify something (the green screwdriver from the toolbox) and return it to the tool bench for easy access."
+            },
+            {
+              "name": "Adjacent positioning",
+              "instruction": "Find the paper towel next to something (the silver coffee machine) and place it in something (the kitchen paper towel holder) for future use."
+            }
+          ]
+        },
+        {
+          "name": "Category 5",
+          "fullName": "Category 5: Spatial Reasoning",
+          "children": [
+            {
+              "name": "Linear arrangement",
+              "instruction": "Align something (the red apple) directly with the banana on the white table to create a neat, straight line."
+            },
+            {
+              "name": "Spatial assembly",
+              "instruction": "Arrange the cutting board next to something (the metal bowl) on the wooden table to complete the food preparation setup."
+            },
+            {
+              "name": "Directional placement",
+              "instruction": "Place something (the green toy) on the north side of the white table, keeping it within easy reach from that direction."
+            },
+            {
+              "name": "Overlapping objects",
+              "instruction": "Set the blue cup so it partially covers something (the red plate) on the dining table to create a layered arrangement."
+            },
+            {
+              "name": "Mirror positioning",
+              "instruction": "Position the toy bear directly opposite something (the toy owl) on the shelf to create a balanced display."
+            },
+            {
+              "name": "Symmetrical placement",
+              "instruction": "Place something (the white rag) on the table in the same spot as its counterpart on the opposite side to maintain symmetry."
+            },
+            {
+              "name": "Angular arrangement",
+              "instruction": "Arrange something (the pen holder) at a 45-degree angle relative to the sleek laptop to create an organized workspace."
+            },
+            {
+              "name": "Size comparison",
+              "instruction": "Set something (the small yellow ball) beside the large metal ball on the white table to highlight the size difference."
+            },
+            {
+              "name": "Circular arrangement",
+              "instruction": "Create a circular setup by placing the red cup equidistant from something (the green mug and the blue glass) on the table."
+            },
+            {
+              "name": "Hidden item discovery",
+              "instruction": "Reveal something (the metal ball concealed under the white rag) and place it securely on the white table for visibility."
+            }
+          ]
+        },
+        {
+          "name": "Category 6",
+          "fullName": "Category 6: World Knowledge",
+          "children": [
+            {
+              "name": "Typical usage placement",
+              "instruction": "Place something (the cutting board) next to the countertop or prep area where meal preparations typically start."
+            },
+            {
+              "name": "Preparation sequencing",
+              "instruction": "Set something (the red apple) on the cutting board in preparation for slicing."
+            },
+            {
+              "name": "Functional placement",
+              "instruction": "Position something (the pen holder) on the desk near where writing tools are most frequently used."
+            },
+            {
+              "name": "Common storage location",
+              "instruction": "Store something (the white spray) under the sink where cleaning supplies are typically kept."
+            },
+            {
+              "name": "Tool association",
+              "instruction": "Place something (the yellow screwdriver) beside the toy drill to group similar tools together."
+            },
+            {
+              "name": "Activity equipment",
+              "instruction": "Set something (the yellow ball) on the table tennis table, ready for play."
+            },
+            {
+              "name": "Cleanup preparation",
+              "instruction": "Position something (the paper towel) next to the spill on the white table for easy cleanup."
+            },
+            {
+              "name": "Readiness placement",
+              "instruction": "Place something (the schoolbag) by the door, ensuring it is ready for departure in the morning."
+            },
+            {
+              "name": "Beverage preparation",
+              "instruction": "Set something (the orange) near the silver coffee machine to pair fruit with a morning beverage."
+            },
+            {
+              "name": "Food preservation",
+              "instruction": "Place something (the banana) in the fruit drawer of the refrigerator to keep it fresh for a longer time."
+            }
+          ]
+        },
+        {
+          "name": "Category 7",
+          "fullName": "Category 7: Functional Reasoning",
+          "children": [
+            {
+              "name": "Problem-solving placement",
+              "instruction": "Move something (the chair) under the high shelf to safely reach items stored out of reach."
+            },
+            {
+              "name": "Purpose alignment",
+              "instruction": "Place something (the metal bowl) on the dining table, ready to serve food during the upcoming meal."
+            },
+            {
+              "name": "Convenience positioning",
+              "instruction": "Set something (the pen holder) beside the sleek laptop to keep writing utensils within easy reach."
+            },
+            {
+              "name": "Spill management",
+              "instruction": "Use something (the white rag) to cover and absorb the spill on the white table."
+            },
+            {
+              "name": "Energy access",
+              "instruction": "Position something (the sleek laptop) near the power outlet to recharge its battery."
+            },
+            {
+              "name": "Tool preparation",
+              "instruction": "Place something (the green screwdriver) next to the toy drill, making both tools readily available."
+            },
+            {
+              "name": "Proper disposal",
+              "instruction": "Dispose of something (the used paper cup) in the trash bin to maintain cleanliness."
+            },
+            {
+              "name": "Enhanced experience",
+              "instruction": "Set something (the white VR glasses) near the sleek laptop for an immersive virtual exploration session."
+            },
+            {
+              "name": "Future use preparation",
+              "instruction": "Store something (the red apple) inside the schoolbag for consumption later in the day."
+            },
+            {
+              "name": "Game setup",
+              "instruction": "Place something (the yellow ball) on the table tennis table to initiate the game."
+            }
+          ]
+        },
+        {
+          "name": "Category 8",
+          "fullName": "Category 8: Temporal Reasoning",
+          "children": [
+            {
+              "name": "Sequential arrangement",
+              "instruction": "Arrange something (the green toy) after the yellow ball on the white table, continuing the sequence."
+            },
+            {
+              "name": "Past position recall",
+              "instruction": "Place something (the red apple) in the exact spot where the banana was on the dining table."
+            },
+            {
+              "name": "Progression display",
+              "instruction": "Set something (the closed white box) next to the open one on the white table."
+            },
+            {
+              "name": "Lifecycle ordering",
+              "instruction": "Position something (the whole orange) before the sliced one on the dining table."
+            },
+            {
+              "name": "Before-and-after comparison",
+              "instruction": "Place something (the clean white rag) beside the used one in the trash bin."
+            },
+            {
+              "name": "Growth sequence",
+              "instruction": "Arrange something (the smaller toy owl) before the larger toy bear on the shelf."
+            },
+            {
+              "name": "Usage timeline",
+              "instruction": "Set something (the full blue bottle) before the empty one in the recycling area."
+            },
+            {
+              "name": "State transition",
+              "instruction": "Place something (the closed red box) after the open one on the white table."
+            },
+            {
+              "name": "Assembly progression",
+              "instruction": "Position something (the toy drill) next to the assembled keyboard packaging box."
+            },
+            {
+              "name": "Game initiation",
+              "instruction": "Set something (the yellow ball) in the serving position on the table tennis table."
+            }
+          ]
+        },
+        {
+          "name": "Category 9",
+          "fullName": "Category 9: Causal Reasoning",
+          "children": [
+            {
+              "name": "Cause and effect action",
+              "instruction": "Notice the spill from something (the blue bottle) on the white table, and use a paper towel to clean it immediately."
+            },
+            {
+              "name": "Problem resolution",
+              "instruction": "Find something (the broken red box) and use the orange tape to repair it."
+            },
+            {
+              "name": "Preventive measure",
+              "instruction": "Move something (the chair) away from the unstable table to avoid an accident."
+            },
+            {
+              "name": "Item recovery",
+              "instruction": "Retrieve something (the pen holder) from the floor and return it to the white table."
+            },
+            {
+              "name": "Energy restoration",
+              "instruction": "Place something (the sleek laptop) on the white table in the reach of its charging cable."
+            },
+            {
+              "name": "Event linking",
+              "instruction": "Return something (the toy owl) to the shelf with plants after it fell."
+            },
+            {
+              "name": "Safety action",
+              "instruction": "Dispose of something (the banana peel) in the trash bin to prevent anyone from slipping."
+            },
+            {
+              "name": "Chain reaction prevention",
+              "instruction": "Secure something (the blue cup) on the white table to prevent it from tipping over."
+            },
+            {
+              "name": "Cause analysis",
+              "instruction": "Identify that the blue cup is near the edge of the table and move it inward."
+            },
+            {
+              "name": "Consequence management",
+              "instruction": "Unplug something (the silver coffee machine) when not in use to save energy."
+            }
+          ]
+        },
+        {
+          "name": "Category 10",
+          "fullName": "Category 10: Commonsense Reasoning",
+          "children": [
+            {
+              "name": "Anomaly correction",
+              "instruction": "Find something (the cutting board on the floor) and place it back on the kitchen counter."
+            },
+            {
+              "name": "Appropriate item placement",
+              "instruction": "Notice something (the toy gun on the dining table) and move it to the toy box where it belongs."
+            },
+            {
+              "name": "Waste avoidance",
+              "instruction": "See something (the red apple mistakenly placed in the trash can) and return it to the dining table."
+            },
+            {
+              "name": "Logical arrangement",
+              "instruction": "Find something (the blue cloth in the oven) and move it near the microwave."
+            },
+            {
+              "name": "Tidiness maintenance",
+              "instruction": "Pick up something (the white paper cup from the floor) and set it on the white table."
+            },
+            {
+              "name": "Proper usage",
+              "instruction": "Move something (the metal bowl from the chair) to the dining table where it belongs."
+            },
+            {
+              "name": "Safety awareness",
+              "instruction": "Remove something (the toy bear from the microwave) and place it on the shelf with plants."
+            },
+            {
+              "name": "Item organization",
+              "instruction": "Store something (the white spray from the dining table) under the sink."
+            },
+            {
+              "name": "Tool safety",
+              "instruction": "Put something (the yellow screwdriver) back into the toolbox for safekeeping."
+            },
+            {
+              "name": "Dining etiquette",
+              "instruction": "Move something (the banana from the chair) to the dining table, where food is typically eaten."
+            }
+          ]
+        },
+        {
+          "name": "Category 11",
+          "fullName": "Category 11: Hypothetical Reasoning",
+          "children": [
+            {
+              "name": "Preventive planning",
+              "instruction": "Place something (the red box) under the leaking pipe to catch dripping water."
+            },
+            {
+              "name": "Alternative solutions",
+              "instruction": "Use something (the paper towel) to clean the spill; if it’s unavailable, opt for the white rag."
+            },
+            {
+              "name": "Risk mitigation",
+              "instruction": "Move something (the metal bowl) away from the table's edge to prevent it from falling."
+            },
+            {
+              "name": "Resource substitution",
+              "instruction": "Choose something (the yellow screwdriver) instead of the green one and place it near the toy drill."
+            },
+            {
+              "name": "Problem solving",
+              "instruction": "Use something (the blue cloth) for cleaning if the white rag is unavailable."
+            },
+            {
+              "name": "Item replacement",
+              "instruction": "Select something (the red cup) instead of the blue one and set it on the white table."
+            },
+            {
+              "name": "Safety precaution",
+              "instruction": "Surround the spill area with something (the orange tape) to warn others of the hazard."
+            },
+            {
+              "name": "Space optimization",
+              "instruction": "Place something (the cutting board) on the shelf if the white table lacks space."
+            },
+            {
+              "name": "Energy conservation",
+              "instruction": "Unplug something (the silver coffee machine) when not in use to conserve energy."
+            },
+            {
+              "name": "Activity alternative",
+              "instruction": "Set something (the yellow ball) on the table tennis table to start a game if the toy gun is unavailable."
+            }
+          ]
+        },
+        {
+          "name": "Category 12",
+          "fullName": "Category 12: Analogical Reasoning",
+          "children": [
+            {
+              "name": "Analogy completion",
+              "instruction": "Place something (the pen holder) beside the sleek laptop, just as the cup sits next to the coffee machine."
+            },
+            {
+              "name": "Similarity grouping",
+              "instruction": "Arrange something (the toy bear) next to the toy owl on the shelf with plants."
+            },
+            {
+              "name": "Metaphorical action",
+              "instruction": "Cover something (the spill) with the white rag, like a blanket covers a bed."
+            },
+            {
+              "name": "Function analogy",
+              "instruction": "Set something (the blue bottle) near the water dispenser, just as the cup is near the coffee machine."
+            },
+            {
+              "name": "Visual analogy",
+              "instruction": "Place something (the round metal ball) beside the round red apple on the white table."
+            },
+            {
+              "name": "Usage analogy",
+              "instruction": "Position something (the toy drill) next to the green keyboard packaging box, as tools accompany assembly."
+            },
+            {
+              "name": "Role comparison",
+              "instruction": "Set something (the pen holder) on the desk, just as the cup is on the dining table."
+            },
+            {
+              "name": "Process analogy",
+              "instruction": "Place something (the cutting board) near the red apple, preparing as one does before cooking."
+            },
+            {
+              "name": "Energy analogy",
+              "instruction": "Position something (the sleek laptop) near the power outlet, like the blue bottle near the water dispenser."
+            },
+            {
+              "name": "Containment analogy",
+              "instruction": "Set something (the red box) on the white table, as the red cup is placed on the dining table."
+            }
+          ]
+        },
+        {
+          "name": "Category 13",
+          "fullName": "Category 13: Complex Spatial Reasoning",
+          "children": [
+            {
+              "name": "3D manipulation",
+              "instruction": "Invert something (the metal bowl) and place it upside down on the white table."
+            },
+            {
+              "name": "Perspective adjustment",
+              "instruction": "Set something (the toy owl) on the highest level of the shelf with plants."
+            },
+            {
+              "name": "Spatial stacking",
+              "instruction": "Stack something (the red box) atop the white box on the white table."
+            },
+            {
+              "name": "Depth perception",
+              "instruction": "Choose something (the nearer of the two blue cups) and place it on the silver coffee machine."
+            },
+            {
+              "name": "Puzzle assembly",
+              "instruction": "Assemble something (the puzzle pieces) by fitting the triangular piece into the corresponding slot."
+            },
+            {
+              "name": "Symmetry creation",
+              "instruction": "Position something (the green toy) symmetrically opposite the yellow ball on the wooden table."
+            },
+            {
+              "name": "Spatial rotation",
+              "instruction": "Rotate something (the toy bear) before placing it back on the shelf with plants."
+            },
+            {
+              "name": "Hidden object retrieval",
+              "instruction": "Reveal something (the metal ball hidden behind the red box) and place it on the white table."
+            },
+            {
+              "name": "Pattern completion",
+              "instruction": "Use something (the orange tape) to finish the design on the white table."
+            },
+            {
+              "name": "Object rotation",
+              "instruction": "Rotate something (the cutting board) by 90 degrees before setting it on the wooden table."
+            }
+          ]
+        },
+        {
+          "name": "Category 14",
+          "fullName": "Category 14: Problem Solving and Planning",
+          "children": [
+            {
+              "name": "Preparation for planning",
+              "instruction": "Place something (the whiteboard eraser) next to the whiteboard to ensure it's ready for use."
+            },
+            {
+              "name": "Resource organization",
+              "instruction": "Store something (the red apple) inside the schoolbag for future use."
+            },
+            {
+              "name": "Path clearance",
+              "instruction": "Move something (the chair) aside to clear the path to the white table."
+            },
+            {
+              "name": "Tool preparation",
+              "instruction": "Set something (the green screwdriver) near the broken laptop to prepare for repairs."
+            },
+            {
+              "name": "Repair setup",
+              "instruction": "Place something (the orange tape) next to the torn brown paper bag."
+            },
+            {
+              "name": "Ingredient gathering",
+              "instruction": "Gather something (all the ingredients) on the countertop before starting to cook."
+            },
+            {
+              "name": "Cooking preparation",
+              "instruction": "Set something (the cutting board) on the kitchen counter to begin meal prep."
+            },
+            {
+              "name": "Game preparation",
+              "instruction": "Place something (the yellow ball) on the table tennis table to initiate the game."
+            },
+            {
+              "name": "Item grouping",
+              "instruction": "Gather something (the red gloves) together on the white table for easy access."
+            },
+            {
+              "name": "Access facilitation",
+              "instruction": "Move something (the chair) correctly under the high shelf to reach the sleek laptop above."
+            }
+          ]
+        },
+        {
+          "name": "Category 15",
+          "fullName": "Category 15: Symbolic Reasoning",
+          "children": [
+            {
+              "name": "Chess piece arrangement",
+              "instruction": "Arrange something (the chess pieces) on the board according to their symbolic representations."
+            },
+            {
+              "name": "Icon association",
+              "instruction": "Set something (the blue cup with a star symbol) on the boxes marked with a star."
+            },
+            {
+              "name": "Diagram following",
+              "instruction": "Arrange something (the green toy) on the white table exactly as depicted in the diagram."
+            },
+            {
+              "name": "Sign interpretation",
+              "instruction": "Dispose of waste in something (the bin labeled with the recycling symbol)."
+            },
+            {
+              "name": "Numeric placement",
+              "instruction": "Place something (the dollar bill) beside the red box displaying a '+' sign."
+            },
+            {
+              "name": "Icon identification",
+              "instruction": "Set something (the sleek laptop) on the desk marked with a computer icon."
+            },
+            {
+              "name": "Name recognition",
+              "instruction": "Store something (the white spray labeled 'cleaner') under the sink."
+            },
+            {
+              "name": "Directional guidance",
+              "instruction": "Place something (the red apple) where the arrow points on the white table."
+            },
+            {
+              "name": "Map reading",
+              "instruction": "Position something (the toy owl) at the location indicated on the whiteboard map."
+            },
+            {
+              "name": "Sequence arrangement",
+              "instruction": "Arrange something (the numbered objects from '1' to '5') in order on the white table."
+            }
+          ]
+        },
+        {
+          "name": "Category 16",
+          "fullName": "Category 16: Adversarial Robustness",
+          "children": [
+            {
+              "name": "Ambiguity resolution",
+              "instruction": "Find something (the green mug) even under misleading lighting, and place it on the white table."
+            },
+            {
+              "name": "Label correction",
+              "instruction": "Set something (the red box labeled 'blue') onto the correct plate, matching its true color."
+            },
+            {
+              "name": "Illusion discrimination",
+              "instruction": "Place something (the metal ball that appears larger) next to the smaller one for accurate comparison."
+            },
+            {
+              "name": "Reality confirmation",
+              "instruction": "Ensure that something (the object resembling a toy bear) is correctly identified as a toy, then place it back on the shelf with plants."
+            },
+            {
+              "name": "Distance adjustment",
+              "instruction": "Retrieve something (the small red apple from afar) and place it on the white table."
+            },
+            {
+              "name": "Distortion identification",
+              "instruction": "Identify something (the object that appears distorted through the glass) and place it on the table."
+            },
+            {
+              "name": "Depth perception test",
+              "instruction": "Choose something that is close (the closer blue cup) and place it atop the silver coffee machine."
+            },
+            {
+              "name": "Pattern completion",
+              "instruction": "Locate something (the missing yellow ball) to complete the pattern on the wooden table."
+            },
+            {
+              "name": "Reflection differentiation",
+              "instruction": "Place something (the actual toy owl) on the shelf with plants, ensuring it's not just a reflection."
+            },
+            {
+              "name": "Color illusion correction",
+              "instruction": "Find something (the fruit that appears green under blue light) and set it on the dining table."
+            }
+          ]
+        },
+        {
+          "name": "Category 17",
+          "fullName": "Category 17: Multi-Modal Integration",
+          "children": [
+            {
+              "name": "Image text alignment",
+              "instruction": "Place something (the red apple depicted in the image) onto the dining table."
+            },
+            {
+              "name": "Data application",
+              "instruction": "Use the data from something (chart) displayed on the laptop to arrange the items on the white table by size."
+            },
+            {
+              "name": "Schedule coordination",
+              "instruction": "Position something (the toy owl listed on the schedule) onto the shelf with plants."
+            },
+            {
+              "name": "Diagram implementation",
+              "instruction": "Arrange something (the chair's pillow) as indicated by the seating plan on the whiteboard."
+            },
+            {
+              "name": "Manual following",
+              "instruction": "Place something (the white VR glasses) on the table according to the manual's guidance."
+            },
+            {
+              "name": "Label understanding",
+              "instruction": "Store something (the spray labeled in another language) under the sink where it belongs."
+            },
+            {
+              "name": "Map utilization",
+              "instruction": "Set something (the red gloves) at the exit point marked on the map."
+            },
+            {
+              "name": "Legend interpretation",
+              "instruction": "Dispose of something (the recyclable blue bottle) in the recycling area as indicated by the legend."
+            },
+            {
+              "name": "Icon matching",
+              "instruction": "Place something (the umbrella) near the door, aligning it with the rain symbol."
+            },
+            {
+              "name": "Chart correlation",
+              "instruction": "Arrange something (the objects from shortest to tallest) on the white table according to the chart."
+            }
+          ]
+        }
+      ]
+    };
+
+    root = d3.hierarchy(data, d => d.children);
+    root.x0 = height / 2;
+    root.y0 = 0;
+
+    if (root.children) {
+      root.children.forEach(collapse);
+    }
+
+    update(root);
+
+    function collapse(d) {
+      if (d.children) {
+        d._children = d.children;
+        d._children.forEach(collapse);
+        d.children = null;
+      }
+    }
+
+    function update(source) {
+      const treeData = treemap(root);
+      const nodes = treeData.descendants(),
+            links = treeData.descendants().slice(1);
+      nodes.forEach(d => d.y = d.depth * 180);
+
+      const node = svg.selectAll('g.node')
+          .data(nodes, d => d.id || (d.id = ++i));
+
+      const nodeEnter = node.enter().append('g')
+          .attr('class', 'node')
+          .attr("transform", () => `translate(${source.y0},${source.x0})`)
+          .on('click', click)
+          .on('mouseover', function(event, d) {
+            showTooltip(event, d);
+          })
+          .on('mouseout', hideTooltip);
+
+      nodeEnter.append('circle')
+          .attr('class', 'node')
+          .attr('r', 1e-6)
+          .style("fill", d => d._children ? "#e67e22" : "#f1c40f");
+
+      nodeEnter.append('text')
+          .attr("dy", ".35em")
+          .attr("x", d => d.children || d._children ? -13 : 13)
+          .attr("text-anchor", d => d.children || d._children ? "end" : "start")
+          .text(d => d.data.name);
+
+      const nodeUpdate = nodeEnter.merge(node);
+
+      nodeUpdate.transition()
+        .duration(duration)
+        .attr("transform", d => `translate(${d.y},${d.x})`);
+
+      nodeUpdate.select('circle.node')
+        .attr('r', 10)
+        .style('fill', d => d._children ? "#e67e22" : "#f1c40f")
+        .attr('cursor', 'pointer');
+
+      const nodeExit = node.exit().transition()
+          .duration(duration)
+          .attr("transform", () => `translate(${source.y},${source.x})`)
+          .remove();
+
+      nodeExit.select('circle')
+        .attr('r', 1e-6);
+
+      nodeExit.select('text')
+        .style('fill-opacity', 1e-6);
+
+      const link = svg.selectAll('path.link')
+          .data(links, d => d.id);
+
+      const linkEnter = link.enter().insert('path', "g")
+          .attr("class", "link")
+          .attr('d', () => {
+            const o = {x: source.x0, y: source.y0};
+            return diagonal(o, o);
+          });
+
+      const linkUpdate = linkEnter.merge(link);
+
+      linkUpdate.transition()
+          .duration(duration)
+          .attr('d', d => diagonal(d, d.parent));
+
+      const linkExit = link.exit().transition()
+          .duration(duration)
+          .attr('d', () => {
+            const o = {x: source.x, y: source.y};
+            return diagonal(o, o);
+          })
+          .remove();
+
+      nodes.forEach(d => {
+        d.x0 = d.x;
+        d.y0 = d.y;
+      });
+
+      function diagonal(s, d) {
+        return `M ${s.y} ${s.x}
+                C ${(s.y + d.y) / 2} ${s.x},
+                  ${(s.y + d.y) / 2} ${d.x},
+                  ${d.y} ${d.x}`;
+      }
+
+      function click(event, d) {
+        if (d.children || d._children) {
+          const ancestors = getAncestors(d);
+          ancestors.push(d);
+
+          root.descendants().forEach(function(node) {
+            if (!ancestors.includes(node)) {
+              if (node.children) {
+                node._children = node.children;
+                node.children = null;
+              }
+            }
+          });
+
+          if (d.children) {
+            d._children = d.children;
+            d.children = null;
+          } else {
+            d.children = d._children;
+            d._children = null;
+          }
+
+          update(d);
+        }
+
+        if (!d.children && !d._children) {
+          displayInstruction(d.data.fullName || d.data.name, d.data.instruction, d.data.image);
+        } else if (d.data.fullName) {
+          displayInstruction(d.data.fullName, "", null);
+        }
+      }
+    }
+
+    const tooltip = d3.select("#tooltip");
+
+    function showTooltip(event, d) {
+      tooltip.transition()
+        .duration(200)
+        .style("opacity", .9);
+      tooltip.html(d.data.fullName || d.data.name)
+        .style("left", (event.pageX + 10) + "px")
+        .style("top", (event.pageY - 28) + "px");
+    }
+
+    function hideTooltip() {
+      tooltip.transition()
+        .duration(500)
+        .style("opacity", 0);
+    }
+
+    function displayInstruction(activityName, instructionText, imageSrc) {
+      const details = document.getElementById('details');
+      details.innerHTML = `<h2>${capitalizeFirstLetter(activityName)}</h2><p>${instructionText || ""}</p>`;
+
+      if (imageSrc) {
+        const img = document.createElement('img');
+        img.src = imageSrc;
+        img.alt = activityName;
+        img.onerror = () => {
+          const errorMsg = document.createElement('p');
+          errorMsg.style.color = '#e74c3c';
+          errorMsg.textContent = "Image failed to load.";
+          details.appendChild(errorMsg);
+        };
+        details.appendChild(img);
+      }
+    }
+
+    function capitalizeFirstLetter(string) {
+      return string.charAt(0).toUpperCase() + string.slice(1);
+    }
+
+    function getAncestors(node) {
+      const ancestors = [];
+      let current = node;
+      while (current.parent) {
+        ancestors.push(current.parent);
+        current = current.parent;
+      }
+      return ancestors;
+    }
+
+    window.addEventListener('resize', () => {
+      const newWidth = window.innerWidth * 0.7 - margin.left - margin.right;
+      const newHeight = window.innerHeight - margin.top - margin.bottom;
+      d3.select("svg")
+        .attr("width", newWidth + margin.left + margin.right)
+        .attr("height", newHeight + margin.top + margin.bottom);
+      treemap.size([newHeight, newWidth]);
+      update(root);
+    });
+  </script>
+</body>
+</html>
